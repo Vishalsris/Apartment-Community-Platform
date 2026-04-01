@@ -9,7 +9,7 @@ const Topbar = () => {
   const [notificationsOpen, setNotificationsOpen] = useState(false);
 
   return (
-    <header className="h-16 bg-white/70 backdrop-blur-md border-b border-border flex items-center justify-between px-6 sticky top-0 z-10 w-full transition-colors duration-300 shadow-sm">
+    <header className="h-16 bg-white/70 backdrop-blur-md border-b border-border flex items-center justify-between px-6 sticky top-0 z-40 w-full transition-colors duration-300 shadow-sm">
       <div className="flex-1"></div>
       
       <div className="flex items-center gap-4">

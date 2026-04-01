@@ -6,7 +6,7 @@ import Input from '../../components/ui/Input';
 import Modal from '../../components/ui/Modal';
 import SkeletonLoader from '../../components/ui/SkeletonLoader';
 import ImageUpload from '../../components/ui/ImageUpload';
-import { Plus, Search, MessageCircle, Image, Star, Phone, Mail, Home } from 'lucide-react';
+import { Plus, Search, MessageCircle, Image as ImageIcon, Star, Phone, Mail, Home, ShoppingBag } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { toast } from 'react-hot-toast';
 import axios from 'axios';
