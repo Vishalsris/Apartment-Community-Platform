@@ -50,7 +50,7 @@ const Events = () => {
         { 
           _id: '1', title: 'Community Association Meeting', description: 'Monthly meetup to discuss community matters and budget.', 
           date: new Date(Date.now() + 86400000).toISOString(), location: 'Main Clubhouse', status: 'Approved', 
-          organizer: { name: 'Admin User' }, 
+          organizer: { name: 'Community Management', apartmentNumber: 'Staff Office', phoneNumber: '555-0100', email: 'admin@communityhub.com' }, 
           polls: [
              { _id: 'p1', optionText: 'Morning (10 AM)', votes: ['test1', 'test2'] },
              { _id: 'p2', optionText: 'Evening (6 PM)', votes: ['test3'] }
@@ -229,7 +229,7 @@ const Events = () => {
                       </button>
                     </div>
                   )}
-                  {event.organizer && activeTab !== 'hosted' && (
+                  {event.organizer?.name && activeTab !== 'hosted' && (
                      <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm px-2.5 py-1.5 rounded-lg shadow-sm font-semibold text-xs flex items-center gap-1.5 text-indigo-700">
                         Hosted by {event.organizer.name}
                      </div>
@@ -367,9 +367,18 @@ const Events = () => {
               {activeEvent.organizer && (
                 <div className="bg-primary/5 p-4 rounded-xl border border-primary/20 mb-4 text-sm">
                   <h4 className="font-bold text-primary mb-1">Host / Organizer</h4>
-                  <p className="text-textMain font-medium">{activeEvent.organizer.name} <span className="text-textMuted">(Apt {activeEvent.organizer.apartmentNumber})</span></p>
-                  <div className="flex gap-4 mt-2 text-textMuted">
-                    <span>{activeEvent.organizer.phoneNumber || 'No phone provided'}</span>
+                  <p className="text-textMain font-medium">
+                    {activeEvent.organizer.name} 
+                    {activeEvent.organizer.apartmentNumber && (
+                      <span className="text-textMuted ml-1">(Apt {activeEvent.organizer.apartmentNumber})</span>
+                    )}
+                  </p>
+                  <div className="flex flex-wrap gap-4 mt-2 text-textMuted italic">
+                    {activeEvent.organizer.phoneNumber ? (
+                      <span>{activeEvent.organizer.phoneNumber}</span>
+                    ) : (
+                      <span className="opacity-60">Mobile Number: Not provided</span>
+                    )}
                     <span>{activeEvent.organizer.email}</span>
                   </div>
                 </div>
@@ -391,7 +400,12 @@ const Events = () => {
                       {activeEvent.rsvps.map((rsvp, idx) => (
                         <div key={idx} className="flex justify-between items-center py-2 border-b border-border/50 last:border-0">
                           <div>
-                            <p className="text-sm font-bold text-textMain">{rsvp.user?.name} <span className="text-xs font-normal text-textMuted">(Apt {rsvp.user?.apartmentNumber})</span></p>
+                            <p className="text-sm font-bold text-textMain">
+                              {rsvp.user?.name} 
+                              {rsvp.user?.apartmentNumber && (
+                                <span className="text-xs font-normal text-textMuted ml-1">(Apt {rsvp.user.apartmentNumber})</span>
+                              )}
+                            </p>
                             <p className="text-xs text-textMuted mt-0.5">Guests: {rsvp.familyMembers}</p>
                           </div>
                           <div className="text-sm font-bold text-primary bg-primary/10 px-3 py-1 rounded-lg">

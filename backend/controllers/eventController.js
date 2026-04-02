@@ -42,7 +42,11 @@ const createEventRequest = async (req, res) => {
       image: imagePath
     });
 
-    res.status(201).json(event);
+    const populatedEvent = await Event.findById(event._id)
+      .populate('organizer', 'name email phoneNumber apartmentNumber')
+      .populate('rsvps.user', 'name email phoneNumber apartmentNumber');
+
+    res.status(201).json(populatedEvent);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -83,7 +87,12 @@ const voteOnPoll = async (req, res) => {
     if (!voted) return res.status(400).json({ message: 'Invalid poll option' });
 
     await event.save();
-    res.json(event);
+    
+    const updatedEvent = await Event.findById(event._id)
+      .populate('organizer', 'name email phoneNumber apartmentNumber')
+      .populate('rsvps.user', 'name email phoneNumber apartmentNumber');
+
+    res.json(updatedEvent);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -142,7 +151,12 @@ const updateEvent = async (req, res) => {
     }
 
     const updatedEvent = await event.save();
-    res.json(updatedEvent);
+    
+    const populatedEvent = await Event.findById(updatedEvent._id)
+      .populate('organizer', 'name email phoneNumber apartmentNumber')
+      .populate('rsvps.user', 'name email phoneNumber apartmentNumber');
+
+    res.json(populatedEvent);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
