@@ -3,7 +3,7 @@ const Business = require('../models/Business');
 const getBusinesses = async (req, res) => {
   try {
     const filter = req.user.role === 'Admin' ? {} : { approvalStatus: 'Approved' };
-    const businesses = await Business.find(filter).populate('owner', 'name').sort({ createdAt: -1 });
+    const businesses = await Business.find(filter).populate('owner', 'name apartmentNumber').sort({ createdAt: -1 });
     res.json(businesses);
   } catch (error) {
     res.status(500).json({ message: error.message });

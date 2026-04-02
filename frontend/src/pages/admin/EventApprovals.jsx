@@ -47,7 +47,7 @@ const EventApprovals = () => {
         headers: { Authorization: `Bearer ${JSON.parse(localStorage.getItem('userInfo')).token}` }
       });
       setEvents(events.map(ev => ev._id === id ? { ...ev, status } : ev));
-      toast.success(`Event ${status.toLowerCase()}`);
+      toast.success(status === 'Approved' ? 'Event successfully approved' : 'Event rejected');
     } catch (error) {
       toast.error('Failed to update event status');
     }
@@ -149,8 +149,14 @@ const EventApprovals = () => {
                                 <Users size={14}/> RSVPs ({event.rsvps ? event.rsvps.length : 0})
                               </button>
                             )}
-                            <span className={`px-2.5 py-1 rounded-lg text-xs font-semibold ${event.status === 'Approved' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-                              {event.status}
+                            <span className={`px-2.5 py-1 rounded-lg text-xs font-semibold ${
+                              new Date(event.date) < new Date() && event.status === 'Approved' 
+                                ? 'bg-gray-100 text-gray-600 border border-gray-200' 
+                                : event.status === 'Approved' 
+                                  ? 'bg-green-100 text-green-700' 
+                                  : 'bg-red-100 text-red-700'
+                            }`}>
+                              {new Date(event.date) < new Date() && event.status === 'Approved' ? 'Finished' : event.status}
                             </span>
                           </div>
                         </td>

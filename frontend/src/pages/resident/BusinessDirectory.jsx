@@ -21,6 +21,8 @@ const BusinessDirectory = () => {
   const [formData, setFormData] = useState({ 
     name: '', description: '', category: 'Services', contactEmail: '', contactPhone: '', website: '', logoUrl: ''
   });
+  const [selectedBusiness, setSelectedBusiness] = useState(null);
+  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
 
   useEffect(() => {
     fetchBusinesses();
@@ -97,6 +99,11 @@ const BusinessDirectory = () => {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: index * 0.1, duration: 0.5 }}
+              onClick={() => {
+                setSelectedBusiness(business);
+                setIsDetailsModalOpen(true);
+              }}
+              className="cursor-pointer"
             >
               <Card className="flex flex-col h-full relative overflow-hidden group border-gray-100 shadow-[0_20px_50px_-20px_rgba(0,0,0,0.05)] hover:shadow-[0_20px_50px_-20px_rgba(0,0,0,0.15)] transition-all duration-500 rounded-[2.5rem] p-8" hoverEffect={true}>
                 <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-50 rounded-bl-[5rem] -mr-10 -mt-10 group-hover:scale-110 transition-transform duration-700 opacity-50"></div>
@@ -202,6 +209,72 @@ const BusinessDirectory = () => {
             <Button type="submit" isLoading={submitLoading}>Add Listing</Button>
           </div>
         </form>
+      </Modal>
+
+      <Modal isOpen={isDetailsModalOpen} onClose={() => setIsDetailsModalOpen(false)} title="Business Details">
+        {selectedBusiness && (
+          <div className="space-y-6">
+             <div className="flex items-center gap-6 p-4 bg-gray-50 rounded-3xl border border-gray-100">
+                <div className={`h-24 w-24 rounded-3xl overflow-hidden shadow-lg border-4 border-white ${!selectedBusiness.logoUrl && 'bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center'}`}>
+                    {selectedBusiness.logoUrl ? (
+                      <img src={selectedBusiness.logoUrl} alt={selectedBusiness.name} className="w-full h-full object-cover" />
+                    ) : (
+                      <span className="text-white font-black text-4xl uppercase">{selectedBusiness.name.charAt(0)}</span>
+                    )}
+                </div>
+                <div>
+                   <h2 className="text-2xl font-black text-gray-900">{selectedBusiness.name}</h2>
+                   <span className="inline-block px-3 py-1 mt-2 bg-indigo-100 text-indigo-700 rounded-full text-[10px] font-black uppercase tracking-widest">
+                      {selectedBusiness.category}
+                   </span>
+                </div>
+             </div>
+
+             <div className="space-y-4">
+                <h3 className="text-lg font-bold text-gray-900">About this business</h3>
+                <p className="text-gray-600 leading-relaxed">{selectedBusiness.description}</p>
+             </div>
+
+             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-6 border-t border-gray-100">
+                <div className="space-y-4">
+                   <h4 className="text-sm font-black text-gray-400 uppercase tracking-widest">Contact Information</h4>
+                   <div className="space-y-2">
+                      <div className="flex items-center gap-3 text-gray-700 font-bold">
+                         <Phone size={16} className="text-primary" />
+                         {selectedBusiness.contactPhone || 'N/A'}
+                      </div>
+                      <div className="flex items-center gap-3 text-gray-700 font-bold">
+                         <Mail size={16} className="text-primary" />
+                         {selectedBusiness.contactEmail}
+                      </div>
+                   </div>
+                </div>
+                <div className="space-y-4">
+                   <h4 className="text-sm font-black text-gray-400 uppercase tracking-widest">Owner Details</h4>
+                   <div className="space-y-2 p-4 bg-indigo-50/50 rounded-2xl border border-indigo-100">
+                      <div className="text-gray-900 font-black">{selectedBusiness.owner?.name || 'Unknown Resident'}</div>
+                      <div className="text-indigo-600 font-bold flex items-center gap-2">
+                         <MapPin size={14} />
+                         Apartment {selectedBusiness.owner?.apartmentNumber || 'N/A'}
+                      </div>
+                   </div>
+                </div>
+             </div>
+
+             {selectedBusiness.website && (
+                <div className="pt-4">
+                    <a 
+                      href={selectedBusiness.website.startsWith('http') ? selectedBusiness.website : `https://${selectedBusiness.website}`} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="flex items-center justify-center w-full py-4 bg-primary text-white rounded-2xl font-black shadow-lg shadow-primary/20 hover:scale-[1.02] transition-all"
+                    >
+                      <Globe size={18} className="mr-2" /> Visit Official Website
+                    </a>
+                </div>
+             )}
+          </div>
+        )}
       </Modal>
 
     </DashboardLayout>

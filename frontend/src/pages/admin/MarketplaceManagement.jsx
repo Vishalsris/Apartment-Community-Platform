@@ -38,7 +38,7 @@ const MarketplaceManagement = () => {
         headers: { Authorization: `Bearer ${user?.token}` }
       });
       setItems(items.map(i => i._id === id ? { ...i, approvalStatus: status } : i));
-      toast.success(`Item ${status.toLowerCase()}`, { icon: status === 'Approved' ? '✅' : '🚫' });
+      toast.success(status === 'Approved' ? 'Item successfully approved for Marketplace' : 'Item listing rejected', { icon: status === 'Approved' ? '✅' : '🚫' });
     } catch (error) {
       const errorMsg = error.response?.data?.message || error.message;
       toast.error(`Error: ${errorMsg}`);

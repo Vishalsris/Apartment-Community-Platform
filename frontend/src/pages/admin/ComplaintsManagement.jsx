@@ -41,7 +41,7 @@ const ComplaintsManagement = () => {
         headers: { Authorization: `Bearer ${JSON.parse(localStorage.getItem('userInfo')).token}` }
       });
       setComplaints(complaints.map(c => c._id === id ? { ...c, status } : c));
-      toast.success(`Complaint marked as ${status}`);
+      toast.success(`Complaint status successfully updated to ${status}`);
     } catch (error) {
       toast.error('Failed to update status');
     }

@@ -39,7 +39,7 @@ const BusinessManagement = () => {
         headers: { Authorization: `Bearer ${user?.token}` }
       });
       setBusinesses(businesses.map(b => b._id === id ? { ...b, approvalStatus: status } : b));
-      toast.success(`Business ${status.toLowerCase()}`, { icon: status === 'Approved' ? '✅' : '🚫' });
+      toast.success(status === 'Approved' ? 'Business successfully approved' : 'Business listing rejected', { icon: status === 'Approved' ? '✅' : '🚫' });
     } catch (error) {
       const errorMsg = error.response?.data?.message || error.message;
       toast.error(`Error: ${errorMsg}`);

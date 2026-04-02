@@ -36,6 +36,8 @@ const Events = () => {
     fetchEvents();
   }, []);
 
+  const isExpired = (date) => new Date(date) < new Date();
+
   const fetchEvents = async () => {
     try {
       const { data } = await axios.get('/api/events', {
@@ -221,6 +223,11 @@ const Events = () => {
                   )}
                   {event.status === 'Pending' && (
                     <div className="absolute top-3 right-3 bg-yellow-100 text-yellow-700 text-xs px-2.5 py-1 rounded-md font-bold uppercase z-10 shadow-sm border border-yellow-200">Pending Approval</div>
+                  )}
+                  {isExpired(event.date) && event.status === 'Approved' && (
+                    <div className="absolute top-3 right-3 bg-gray-600 text-white text-xs px-2.5 py-1 rounded-md font-bold uppercase z-10 shadow-sm border border-gray-500 flex items-center gap-1.5">
+                      <Check size={12} /> Finished
+                    </div>
                   )}
                   {activeTab === 'hosted' && (
                     <div className="absolute top-3 right-3 flex gap-2 z-20">

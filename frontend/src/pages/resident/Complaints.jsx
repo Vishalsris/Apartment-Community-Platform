@@ -21,6 +21,7 @@ const Complaints = () => {
   const [formData, setFormData] = useState({ title: '', description: '', category: 'Maintenance', proofImage: '' });
   const [submitLoading, setSubmitLoading] = useState(false);
   const [filterStatus, setFilterStatus] = useState('All');
+  const [searchTerm, setSearchTerm] = useState('');
 
 
   useEffect(() => {
@@ -94,6 +95,8 @@ const Complaints = () => {
               type="text" 
               placeholder="Search complaints..." 
               className="w-full pl-12 pr-6 py-3.5 rounded-2xl border border-gray-200 bg-gray-50/50 focus:bg-white focus:border-indigo-300 focus:outline-none focus:ring-4 focus:ring-indigo-50/50 transition-all text-gray-700 font-medium"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
           <select 
@@ -115,7 +118,15 @@ const Complaints = () => {
         </div>
       ) : (
         <div className="space-y-4">
-          {localComplaints.filter(c => filterStatus === 'All' ? true : c.status === filterStatus).map((complaint, index) => (
+          {localComplaints
+            .filter(c => filterStatus === 'All' ? true : c.status === filterStatus)
+            .filter(c => {
+              const searchLower = searchTerm.toLowerCase();
+              return c.title.toLowerCase().includes(searchLower) || 
+                     c.description?.toLowerCase().includes(searchLower) ||
+                     c.category.toLowerCase().includes(searchLower);
+            })
+            .map((complaint, index) => (
             <motion.div
               key={complaint._id}
               initial={{ opacity: 0, y: 10 }}
