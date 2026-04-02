@@ -1,8 +1,11 @@
 const express = require('express');
 const router = express.Router();
-const { getUsers, updateUserRole, deleteUser, updateUserProfile } = require('../controllers/userController');
+const { getUsers, updateUserRole, deleteUser, updateUserProfile, getUserStats } = require('../controllers/userController');
 const { protect } = require('../middleware/authMiddleware');
 const { adminOnly } = require('../middleware/roleMiddleware');
+
+router.route('/stats')
+  .get(protect, getUserStats);
 
 router.route('/')
   .get(protect, adminOnly, getUsers);

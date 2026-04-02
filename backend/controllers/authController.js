@@ -48,6 +48,7 @@ const registerUser = async (req, res) => {
         apartmentNumber: user.apartmentNumber,
         phoneNumber: user.phoneNumber,
         avatarUrl: user.avatarUrl,
+        houseType: user.houseType,
         token: generateToken(user._id),
       });
     } else {
@@ -81,6 +82,8 @@ const loginUser = async (req, res) => {
         name: user.name,
         email: user.email,
         phoneNumber: user.phoneNumber,
+        apartmentNumber: user.apartmentNumber,
+        houseType: user.houseType,
         role: user.role,
         avatarUrl: user.avatarUrl,
         token: generateToken(user._id),

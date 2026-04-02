@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import axios from 'axios';
 import { useAuth } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import Card from '../../components/ui/Card';
@@ -14,17 +15,46 @@ const ResidentDashboard = () => {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
+  const [statsData, setStatsData] = useState({
+    occupiedHouses: 0,
+    totalOwn: 0,
+    totalRental: 0
+  });
+
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setLoading(false);
-    }, 1000);
-    return () => clearTimeout(timer);
+    fetchDashboardData();
   }, []);
 
+  const fetchDashboardData = async () => {
+    try {
+      const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+      if (!userInfo) {
+        setLoading(false);
+        return;
+      }
+      const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
+      
+      const res = await axios.get('/api/users/stats', config).catch(() => ({ data: { totalResidents: 0, totalRental: 0, totalOwn: 0 } }));
+      
+      setStatsData({
+        occupiedHouses: res.data.totalResidents || 0,
+        totalOwn: res.data.totalOwn || 0,
+        totalRental: res.data.totalRental || 0
+      });
+    } catch (error) {
+      console.error('Error fetching dashboard data', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const stats = [
-    { label: 'Community Events', value: '4', icon: Calendar, color: 'text-indigo-500', bg: 'bg-indigo-50', border: 'border-indigo-100', route: '/events' },
-    { label: 'My RSVPs', value: '2', icon: Users, color: 'text-emerald-500', bg: 'bg-emerald-50', border: 'border-emerald-100', route: '/events' },
-    { label: 'Pending Requests', value: '0', icon: AlertTriangle, color: 'text-rose-500', bg: 'bg-rose-50', border: 'border-rose-100', route: '/complaints' },
+    { label: 'Total Houses', value: '200', icon: Home, color: 'text-indigo-500', bg: 'bg-indigo-50', border: 'border-indigo-100', route: '#' },
+    { label: 'Occupied Houses', value: statsData.occupiedHouses.toString(), icon: Users, color: 'text-blue-500', bg: 'bg-blue-50', border: 'border-blue-100', route: '#' },
+    { label: 'Remaining Houses', value: (200 - statsData.occupiedHouses).toString(), icon: Home, color: 'text-purple-500', bg: 'bg-purple-50', border: 'border-purple-100', route: '#' },
+    { label: 'Total Own Houses', value: statsData.totalOwn.toString(), icon: Home, color: 'text-emerald-500', bg: 'bg-emerald-50', border: 'border-emerald-100', route: '#' },
+    { label: 'Total Rental', value: statsData.totalRental.toString(), icon: Home, color: 'text-amber-500', bg: 'bg-amber-50', border: 'border-amber-100', route: '#' },
+    { label: 'Community Events', value: '4', icon: Calendar, color: 'text-rose-500', bg: 'bg-rose-50', border: 'border-rose-100', route: '/events' },
   ];
 
   const eventActivityData = [
@@ -65,9 +95,9 @@ const ResidentDashboard = () => {
           <p className="text-gray-500 font-medium mt-2 text-lg tracking-wide">Here is what's happening in your community today.</p>
         </motion.div>
 
-        <motion.div variants={containerVariants} initial="hidden" animate="visible" className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-10">
+        <motion.div variants={containerVariants} initial="hidden" animate="visible" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-10">
           {loading ? (
-             stats.map((_, i) => <SkeletonLoader key={i} type="card" className="h-32 rounded-3xl" />)
+             Array.from({ length: 6 }).map((_, i) => <SkeletonLoader key={i} type="card" className="h-32 rounded-3xl" />)
           ) : (
             stats.map((stat) => (
               <motion.div key={stat.label} variants={itemVariants}>

@@ -18,7 +18,8 @@ const Profile = () => {
     email: user?.email || '',
     phoneNumber: user?.phoneNumber || '',
     apartmentNumber: user?.apartmentNumber || '',
-    avatarUrl: user?.avatarUrl || ''
+    avatarUrl: user?.avatarUrl || '',
+    houseType: user?.houseType || 'Own House'
   });
 
   const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -30,7 +31,8 @@ const Profile = () => {
         email: user.email || '',
         phoneNumber: user.phoneNumber || '',
         apartmentNumber: user.apartmentNumber || '',
-        avatarUrl: user.avatarUrl || ''
+        avatarUrl: user.avatarUrl || '',
+        houseType: user.houseType || 'Own House'
       });
     }
   }, [user]);
@@ -133,6 +135,16 @@ const Profile = () => {
                        </div>
                      </div>
                   )}
+
+                  <div className="flex items-center gap-4 text-gray-600 bg-gray-50 p-3.5 rounded-2xl border border-gray-100 hover:bg-white hover:shadow-md transition-all duration-300">
+                    <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center shadow-sm text-indigo-500">
+                      <Settings size={18} />
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-xs text-gray-400 font-semibold tracking-wider uppercase mb-0.5">Occupancy</p>
+                      <p className="text-sm font-bold text-gray-800 uppercase">{user?.houseType || 'Own House'}</p>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>

@@ -110,8 +110,17 @@ const MarketplaceManagement = () => {
                       </div>
                     )}
 
+                    {item.status === 'Sold' && (
+                      <div className="absolute inset-0 flex items-center justify-center z-10 pointer-events-none">
+                        <div className="absolute inset-0 bg-gray-900/30 backdrop-blur-[1px]"></div>
+                        <div className="relative bg-gradient-to-br from-indigo-500/90 to-purple-600/90 backdrop-blur-md text-white px-6 py-2 rounded-2xl text-xl font-black tracking-[0.2em] shadow-2xl rotate-[-12deg] border-2 border-white/30 uppercase">
+                          Sold
+                        </div>
+                      </div>
+                    )}
+
                     {/* Top glass badges */}
-                    <div className="absolute top-4 left-4 right-4 flex justify-between items-start pointer-events-none">
+                    <div className="absolute top-4 left-4 right-4 flex justify-between items-start pointer-events-none z-20">
                        <span className={`px-3 py-1 pb-1.5 rounded-full text-xs font-black uppercase tracking-wider shadow-sm backdrop-blur-md border ${
                          item.approvalStatus === 'Approved' ? 'bg-emerald-500/90 text-white border-emerald-400/50' :
                          item.approvalStatus === 'Rejected' ? 'bg-rose-500/90 text-white border-rose-400/50' : 'bg-white/90 text-amber-600 border-amber-100/50'
@@ -129,7 +138,7 @@ const MarketplaceManagement = () => {
                     </div>
 
                     {/* Bottom floating price */}
-                    <div className="absolute bottom-4 left-4 right-4 flex justify-between items-end">
+                    <div className="absolute bottom-4 left-4 right-4 flex justify-between items-end z-20">
                        <div className="bg-white/95 backdrop-blur-xl px-4 py-2 rounded-2xl shadow-lg flex items-center gap-1 border border-white">
                           <DollarSign size={14} className="text-gray-400 stroke-[3]" />
                           <span className="text-lg font-black text-gray-900 tracking-tight">{item.price}</span>
@@ -163,9 +172,9 @@ const MarketplaceManagement = () => {
                        <div className="flex gap-3 pt-2">
                          <button 
                            onClick={() => handleStatusUpdate(item._id, 'Approved')}
-                           disabled={item.approvalStatus === 'Approved'}
+                           disabled={item.approvalStatus === 'Approved' || item.status === 'Sold'}
                            className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl font-bold text-sm transition-all duration-300 border-2 ${
-                             item.approvalStatus === 'Approved' ? 'bg-emerald-50 border-emerald-50 text-emerald-300 opacity-50 cursor-not-allowed' : 'bg-white border-gray-100 text-emerald-600 hover:bg-emerald-500 hover:border-emerald-500 hover:text-white shadow-sm hover:shadow-emerald-200/50 hover:-translate-y-0.5'
+                             (item.approvalStatus === 'Approved' || item.status === 'Sold') ? 'bg-emerald-50 border-emerald-50 text-emerald-300 opacity-50 cursor-not-allowed' : 'bg-white border-gray-100 text-emerald-600 hover:bg-emerald-500 hover:border-emerald-500 hover:text-white shadow-sm hover:shadow-emerald-200/50 hover:-translate-y-0.5'
                            }`}
                          >
                             <Check size={16} className="stroke-[2.5]" /> Approve
@@ -173,9 +182,9 @@ const MarketplaceManagement = () => {
 
                          <button 
                            onClick={() => handleStatusUpdate(item._id, 'Rejected')}
-                           disabled={item.approvalStatus === 'Rejected'}
+                           disabled={item.approvalStatus === 'Rejected' || item.status === 'Sold'}
                            className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl font-bold text-sm transition-all duration-300 border-2 ${
-                             item.approvalStatus === 'Rejected' ? 'bg-rose-50 border-rose-50 text-rose-300 opacity-50 cursor-not-allowed' : 'bg-white border-gray-100 text-rose-500 hover:bg-rose-500 hover:border-rose-500 hover:text-white shadow-sm hover:shadow-rose-200/50 hover:-translate-y-0.5'
+                             (item.approvalStatus === 'Rejected' || item.status === 'Sold') ? 'bg-rose-50 border-rose-50 text-rose-300 opacity-50 cursor-not-allowed' : 'bg-white border-gray-100 text-rose-500 hover:bg-rose-500 hover:border-rose-500 hover:text-white shadow-sm hover:shadow-rose-200/50 hover:-translate-y-0.5'
                            }`}
                          >
                             <X size={16} className="stroke-[2.5]" /> Reject

@@ -13,10 +13,10 @@ const UserManagement = () => {
   const { user } = useAuth();
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
-  
+
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
-  const [roleUpdate, setRoleUpdate] = useState('Resident');
+  const [editData, setEditData] = useState({ name: '', email: '', phoneNumber: '', apartmentNumber: '', role: 'Resident', houseType: 'Own House' });
   const [updateLoading, setUpdateLoading] = useState(false);
 
   useEffect(() => {
@@ -36,18 +36,18 @@ const UserManagement = () => {
     }
   };
 
-  const handleUpdateRole = async (e) => {
+  const handleUpdateUser = async (e) => {
     e.preventDefault();
     setUpdateLoading(true);
     try {
-      const { data } = await axios.put(`/api/users/${selectedUser._id}`, { role: roleUpdate }, {
+      const { data } = await axios.put(`/api/users/${selectedUser._id}`, editData, {
         headers: { Authorization: `Bearer ${JSON.parse(localStorage.getItem('userInfo')).token}` }
       });
-      setUsers(users.map(u => u._id === selectedUser._id ? { ...u, role: data.user.role } : u));
+      setUsers(users.map(u => u._id === selectedUser._id ? { ...u, ...data.user } : u));
       toast.success(data.message);
       setIsEditModalOpen(false);
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Failed to update role');
+      toast.error(error.response?.data?.message || 'Failed to update user');
     } finally {
       setUpdateLoading(false);
     }
@@ -72,8 +72,8 @@ const UserManagement = () => {
         <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="mb-10 relative">
           <div className="absolute top-0 right-10 w-64 h-64 bg-indigo-300 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse pointer-events-none"></div>
           <h1 className="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-gray-900 to-gray-600 tracking-tight flex items-center gap-3">
-             <Users size={36} className="text-indigo-600" />
-             User Management
+            <Users size={36} className="text-indigo-600" />
+            User Management
           </h1>
           <p className="text-gray-500 font-medium mt-2 text-lg tracking-wide">Manage resident accounts, assign admin privileges, and moderate users.</p>
         </motion.div>
@@ -97,9 +97,9 @@ const UserManagement = () => {
                   </tr>
                 ) : (
                   users.map((u, i) => (
-                    <motion.tr 
+                    <motion.tr
                       initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}
-                      key={u._id} 
+                      key={u._id}
                       className="hover:bg-gray-50/50 transition-colors group"
                     >
                       <td className="px-6 py-5">
@@ -125,19 +125,24 @@ const UserManagement = () => {
                           </span>
                         )}
                       </td>
-                      <td className="px-6 py-5 font-bold text-gray-700">
-                        {u.apartmentNumber ? `Apt ${u.apartmentNumber}` : '-'}
+                      <td className="px-6 py-5">
+                        <div className="font-bold text-gray-700">{u.apartmentNumber ? `Apt ${u.apartmentNumber}` : '-'}</div>
+                        <div className="text-xs text-gray-500 font-medium mt-1 uppercase tracking-wider">{u.houseType || 'Own House'}</div>
                       </td>
                       <td className="px-6 py-5 text-right space-x-2">
-                        <button 
-                          onClick={() => { setSelectedUser(u); setRoleUpdate(u.role); setIsEditModalOpen(true); }}
+                        <button
+                          onClick={() => {
+                            setSelectedUser(u);
+                            setEditData({ name: u.name, email: u.email, phoneNumber: u.phoneNumber || '', apartmentNumber: u.apartmentNumber || '', role: u.role, houseType: u.houseType || 'Own House' });
+                            setIsEditModalOpen(true);
+                          }}
                           className="p-2 text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors inline-block"
-                          title="Edit Role"
+                          title="Edit User"
                           disabled={u._id === user._id}
                         >
                           <Edit size={18} />
                         </button>
-                        <button 
+                        <button
                           onClick={() => handleDeleteUser(u._id)}
                           className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors inline-block"
                           title="Remove User"
@@ -158,36 +163,79 @@ const UserManagement = () => {
         </div>
       </div>
 
-      <Modal isOpen={isEditModalOpen} onClose={() => setIsEditModalOpen(false)} title="Update User Role">
+      <Modal isOpen={isEditModalOpen} onClose={() => setIsEditModalOpen(false)} title="Update User Information">
         {selectedUser && (
-          <form onSubmit={handleUpdateRole} className="space-y-6 mt-4">
-            <div className="bg-gray-50 p-4 rounded-2xl border border-gray-100 flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-500 font-semibold tracking-wider uppercase">User</p>
-                <p className="text-lg font-bold text-gray-900 mt-1">{selectedUser.name}</p>
-              </div>
-              <div className="text-right">
-                <p className="text-sm text-gray-500 font-semibold tracking-wider uppercase">Current Role</p>
-                <p className="text-lg font-bold text-indigo-600 mt-1">{selectedUser.role}</p>
-              </div>
-            </div>
-            
+          <form onSubmit={handleUpdateUser} className="space-y-4 mt-4">
             <div>
-              <label className="block text-sm font-semibold text-gray-900 mb-2">Assign New Role</label>
-              <select
-                className="w-full rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm focus:border-indigo-400 focus:outline-none focus:ring-4 focus:ring-indigo-50/50 font-medium"
-                value={roleUpdate}
-                onChange={(e) => setRoleUpdate(e.target.value)}
-              >
-                <option value="Resident">Resident</option>
-                <option value="Admin">Admin</option>
-              </select>
-              <p className="text-xs text-gray-500 mt-2">Admins have full access to approve events, resolve complaints, and manage platform users.</p>
+              <label className="block text-sm font-semibold text-gray-900 mb-1">Full Name</label>
+              <input
+                type="text"
+                className="w-full rounded-2xl border border-gray-200 bg-white px-4 py-2.5 text-sm focus:border-indigo-400 focus:outline-none focus:ring-4 focus:ring-indigo-50/50"
+                value={editData.name}
+                onChange={(e) => setEditData({ ...editData, name: e.target.value })}
+                required
+              />
             </div>
-            
+            <div>
+              <label className="block text-sm font-semibold text-gray-900 mb-1">Email Address</label>
+              <input
+                type="email"
+                className="w-full rounded-2xl border border-gray-200 bg-white px-4 py-2.5 text-sm focus:border-indigo-400 focus:outline-none focus:ring-4 focus:ring-indigo-50/50"
+                value={editData.email}
+                onChange={(e) => setEditData({ ...editData, email: e.target.value })}
+                required
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-semibold text-gray-900 mb-1">Phone Number</label>
+                <input
+                  type="text"
+                  className="w-full rounded-2xl border border-gray-200 bg-white px-4 py-2.5 text-sm focus:border-indigo-400 focus:outline-none focus:ring-4 focus:ring-indigo-50/50"
+                  value={editData.phoneNumber}
+                  onChange={(e) => setEditData({ ...editData, phoneNumber: e.target.value })}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-900 mb-1">Apt Number</label>
+                <input
+                  type="text"
+                  className="w-full rounded-2xl border border-gray-200 bg-white px-4 py-2.5 text-sm focus:border-indigo-400 focus:outline-none focus:ring-4 focus:ring-indigo-50/50"
+                  value={editData.apartmentNumber}
+                  onChange={(e) => setEditData({ ...editData, apartmentNumber: e.target.value })}
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-semibold text-gray-900 mb-1">Assign New Role</label>
+                <select
+                  className="w-full rounded-2xl border border-gray-200 bg-white px-4 py-2.5 text-sm focus:border-indigo-400 focus:outline-none focus:ring-4 focus:ring-indigo-50/50 font-medium"
+                  value={editData.role}
+                  onChange={(e) => setEditData({ ...editData, role: e.target.value })}
+                >
+                  <option value="Resident">Resident</option>
+                  <option value="Admin">Admin</option>
+                </select>
+                <p className="text-xs text-gray-500 mt-2">Admins have full access.</p>
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-900 mb-1">House Type</label>
+                <select
+                  className="w-full rounded-2xl border border-gray-200 bg-white px-4 py-2.5 text-sm focus:border-indigo-400 focus:outline-none focus:ring-4 focus:ring-indigo-50/50 font-medium"
+                  value={editData.houseType}
+                  onChange={(e) => setEditData({ ...editData, houseType: e.target.value })}
+                >
+                  <option value="Own House">Own House</option>
+                  <option value="Rental">Rental</option>
+                </select>
+                <p className="text-xs text-gray-500 mt-2">Specify ownership status.</p>
+              </div>
+            </div>
+
             <div className="flex justify-end gap-3 pt-4 border-t border-gray-100">
               <Button type="button" variant="secondary" onClick={() => setIsEditModalOpen(false)}>Cancel</Button>
-              <Button type="submit" isLoading={updateLoading}>Confirm Update</Button>
+              <Button type="submit" isLoading={updateLoading}>Save Changes</Button>
             </div>
           </form>
         )}

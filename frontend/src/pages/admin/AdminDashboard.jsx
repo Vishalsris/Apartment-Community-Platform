@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
+import axios from 'axios';
 import { useAuth } from '../../context/AuthContext';
-import { Users, Calendar, AlertTriangle, ShieldCheck, Mail, Phone } from 'lucide-react';
+import { Users, Calendar, AlertTriangle, ShieldCheck, Mail, Phone, Home } from 'lucide-react';
 import { motion } from 'framer-motion';
 import SkeletonLoader from '../../components/ui/SkeletonLoader';
 import DashboardLayout from '../../components/layout/DashboardLayout';
@@ -10,18 +11,66 @@ const AdminDashboard = () => {
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
 
+  const [statsData, setStatsData] = useState({
+    totalResidents: 0,
+    totalOwn: 0,
+    totalRental: 0,
+    pendingComplaints: 0,
+    pendingEvents: 0,
+    activeAdmins: 0
+  });
+
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setLoading(false);
-    }, 1000);
-    return () => clearTimeout(timer);
+    fetchDashboardData();
   }, []);
 
+  const fetchDashboardData = async () => {
+    try {
+      const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+      if (!userInfo) {
+        setLoading(false);
+        return;
+      }
+      const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
+      
+      const [usersRes, complaintsRes, eventsRes] = await Promise.all([
+        axios.get('/api/users', config).catch(() => ({ data: [] })),
+        axios.get('/api/complaints', config).catch(() => ({ data: [] })),
+        axios.get('/api/events', config).catch(() => ({ data: [] }))
+      ]);
+
+      const residentUsers = usersRes.data.filter(u => u.role === 'Resident');
+      const residents = residentUsers.length;
+      const rental = residentUsers.filter(u => u.houseType === 'Rental').length;
+      const own = residents - rental;
+      const admins = usersRes.data.filter(u => u.role === 'Admin').length;
+      const pComplaints = complaintsRes.data.filter(c => c.status === 'Pending').length;
+      const pEvents = eventsRes.data.filter(e => e.status === 'Pending').length;
+
+      setStatsData({
+        totalResidents: residents,
+        totalOwn: own,
+        totalRental: rental,
+        activeAdmins: admins,
+        pendingComplaints: pComplaints,
+        pendingEvents: pEvents
+      });
+    } catch (error) {
+      console.error('Error fetching dashboard data', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const stats = [
-    { label: 'Total Residents', value: '145', icon: Users, color: 'text-indigo-500', bg: 'bg-indigo-50', border: 'border-indigo-100' },
-    { label: 'Pending Complaints', value: '12', icon: AlertTriangle, color: 'text-rose-500', bg: 'bg-rose-50', border: 'border-rose-100' },
-    { label: 'Pending Events', value: '3', icon: Calendar, color: 'text-amber-500', bg: 'bg-amber-50', border: 'border-amber-100' },
-    { label: 'Active Admins', value: '4', icon: ShieldCheck, color: 'text-emerald-500', bg: 'bg-emerald-50', border: 'border-emerald-100' },
+    { label: 'Total Houses', value: '200', icon: Home, color: 'text-indigo-500', bg: 'bg-indigo-50', border: 'border-indigo-100' },
+    { label: 'Occupied Houses', value: statsData.totalResidents.toString(), icon: Users, color: 'text-blue-500', bg: 'bg-blue-50', border: 'border-blue-100' },
+    { label: 'Remaining Houses', value: (200 - statsData.totalResidents).toString(), icon: Home, color: 'text-purple-500', bg: 'bg-purple-50', border: 'border-purple-100' },
+    { label: 'Total Own Houses', value: statsData.totalOwn.toString(), icon: Home, color: 'text-emerald-500', bg: 'bg-emerald-50', border: 'border-emerald-100' },
+    { label: 'Total Rental', value: statsData.totalRental.toString(), icon: Home, color: 'text-amber-500', bg: 'bg-amber-50', border: 'border-amber-100' },
+    { label: 'Pending Complaints', value: statsData.pendingComplaints.toString(), icon: AlertTriangle, color: 'text-rose-500', bg: 'bg-rose-50', border: 'border-rose-100' },
+    { label: 'Pending Events', value: statsData.pendingEvents.toString(), icon: Calendar, color: 'text-orange-500', bg: 'bg-orange-50', border: 'border-orange-100' },
+    { label: 'Active Admins', value: statsData.activeAdmins.toString(), icon: ShieldCheck, color: 'text-teal-500', bg: 'bg-teal-50', border: 'border-teal-100' },
   ];
 
   const eventActivityData = [
@@ -63,7 +112,7 @@ const AdminDashboard = () => {
 
         <motion.div variants={containerVariants} initial="hidden" animate="visible" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
           {loading ? (
-            <SkeletonLoader type="card" count={4} className="h-32 rounded-3xl" />
+            <SkeletonLoader type="card" count={8} className="h-32 rounded-3xl" />
           ) : (
             stats.map((stat) => (
               <motion.div key={stat.label} variants={itemVariants}>

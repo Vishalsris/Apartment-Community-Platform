@@ -11,6 +11,8 @@ import axios from 'axios';
 const ComplaintsManagement = () => {
   const [complaints, setComplaints] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterStatus, setFilterStatus] = useState('All');
 
   useEffect(() => {
     fetchComplaints();
@@ -54,6 +56,14 @@ const ComplaintsManagement = () => {
     }
   };
 
+  const filteredComplaints = complaints.filter(c => {
+    const matchesSearch = c.title?.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                          c.user?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                          c.user?.apartmentNumber?.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesFilter = filterStatus === 'All' || c.status === filterStatus;
+    return matchesSearch && matchesFilter;
+  });
+
   return (
     <DashboardLayout>
       <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-6 relative">
@@ -72,11 +82,20 @@ const ComplaintsManagement = () => {
               type="text" 
               placeholder="Search by title, resident, or apartment..." 
               className="w-full pl-12 pr-6 py-3.5 rounded-2xl border border-gray-200 bg-gray-50/50 focus:bg-white focus:border-indigo-300 focus:outline-none focus:ring-4 focus:ring-indigo-50/50 transition-all text-gray-700 font-medium"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
-          <Button variant="secondary" className="flex items-center justify-center gap-2 rounded-2xl px-6 font-bold shadow-sm">
-            <Filter size={18} /> Filters
-          </Button>
+          <select 
+            className="rounded-2xl border border-gray-200 bg-white px-6 py-3.5 focus:border-indigo-300 focus:outline-none focus:ring-4 focus:ring-indigo-50/50 transition-all font-medium text-gray-700 shadow-sm"
+            value={filterStatus}
+            onChange={(e) => setFilterStatus(e.target.value)}
+          >
+            <option value="All">All Statuses</option>
+            <option value="Pending">Pending</option>
+            <option value="In Progress">In Progress</option>
+            <option value="Completed">Completed</option>
+          </select>
         </div>
       </div>
 
@@ -101,8 +120,8 @@ const ComplaintsManagement = () => {
                     </td>
                   </tr>
                 ))
-              ) : complaints.length > 0 ? (
-                complaints.map((complaint) => (
+              ) : filteredComplaints.length > 0 ? (
+                filteredComplaints.map((complaint) => (
                   <tr key={complaint._id} className="hover:bg-gray-50/50 transition-colors">
                     <td className="py-4 px-6">
                       <div className="font-semibold text-textMain">{complaint.user?.name}</div>

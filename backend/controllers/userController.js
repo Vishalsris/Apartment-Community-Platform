@@ -11,14 +11,31 @@ const getUsers = async (req, res) => {
 
 const updateUserRole = async (req, res) => {
   try {
-    const { role } = req.body;
+    const { role, name, email, phoneNumber, apartmentNumber, houseType } = req.body;
     const user = await User.findById(req.params.id);
 
     if (!user) return res.status(404).json({ message: 'User not found' });
 
-    user.role = role || user.role;
+    if (role) user.role = role;
+    if (name) user.name = name;
+    if (email) user.email = email;
+    if (phoneNumber !== undefined) user.phoneNumber = phoneNumber;
+    if (apartmentNumber !== undefined) user.apartmentNumber = apartmentNumber;
+    if (houseType !== undefined) user.houseType = houseType;
+
     await user.save();
-    res.json({ message: 'User role updated successfully', user: { _id: user._id, name: user.name, role: user.role } });
+    res.json({ 
+      message: 'User updated successfully', 
+      user: { 
+        _id: user._id, 
+        name: user.name, 
+        email: user.email,
+        role: user.role,
+        phoneNumber: user.phoneNumber,
+        apartmentNumber: user.apartmentNumber,
+        houseType: user.houseType
+      } 
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -55,6 +72,7 @@ const updateUserProfile = async (req, res) => {
       role: updatedUser.role,
       apartmentNumber: updatedUser.apartmentNumber,
       phoneNumber: updatedUser.phoneNumber,
+      houseType: updatedUser.houseType,
       avatarUrl: updatedUser.avatarUrl,
       token: req.headers.authorization.split(' ')[1]
     });
@@ -63,4 +81,20 @@ const updateUserProfile = async (req, res) => {
   }
 };
 
-module.exports = { getUsers, updateUserRole, deleteUser, updateUserProfile };
+const getUserStats = async (req, res) => {
+  try {
+    const residents = await User.find({ role: 'Resident' });
+    const totalResidents = residents.length;
+    const totalRental = residents.filter(u => u.houseType === 'Rental').length;
+    
+    res.json({
+      totalResidents,
+      totalRental,
+      totalOwn: totalResidents - totalRental
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+module.exports = { getUsers, updateUserRole, deleteUser, updateUserProfile, getUserStats };

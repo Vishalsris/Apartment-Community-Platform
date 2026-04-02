@@ -54,23 +54,8 @@ const Register = () => {
             <Input label="Email Address" type="email" name="email" value={formData.email} onChange={handleChange} placeholder="john@example.com" required />
             <Input label="Password" type="password" name="password" value={formData.password} onChange={handleChange} placeholder="Minimum 6 characters" required minLength="6" />
             
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-textMain mb-1.5">Role</label>
-                <select
-                  name="role"
-                  value={formData.role}
-                  onChange={handleChange}
-                  className="w-full rounded-xl border border-border bg-white px-4 py-2.5 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary h-[42px]"
-                >
-                  <option value="Resident">Resident</option>
-                  <option value="Admin">Admin</option>
-                </select>
-              </div>
-              
-              {formData.role === 'Resident' && (
-                <Input label="Apt Number" name="apartmentNumber" value={formData.apartmentNumber} onChange={handleChange} placeholder="e.g. A-102" required={formData.role === 'Resident'} />
-              )}
+            <div className="grid grid-cols-1 gap-4">
+              <Input label="Apt Number" name="apartmentNumber" value={formData.apartmentNumber} onChange={handleChange} placeholder="e.g. A-102" required />
             </div>
             
             <Input label="Mobile Number" name="phoneNumber" value={formData.phoneNumber} onChange={handleChange} placeholder="e.g. 555-0198" required />
